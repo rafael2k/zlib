@@ -141,8 +141,8 @@ static void pwinerror (s)
 #endif
 #define SUFFIX_LEN (sizeof(GZ_SUFFIX)-1)
 
-#define BUFLEN      16384
-#define MAX_NAME_LEN 1024
+#define BUFLEN      4096
+#define MAX_NAME_LEN 512
 
 #ifdef MAXSEG_64K
 #  define local static
@@ -495,9 +495,10 @@ static void file_uncompress(char *file) {
  *   -c : write to standard output
  *   -d : decompress
  *   -f : compress with Z_FILTERED
- *   -h : compress with Z_HUFFMAN_ONLY
+ *   -u : compress with Z_HUFFMAN_ONLY
  *   -r : compress with Z_RLE
  *   -1 to -9 : compression level
+ *   -h : show this help
  */
 
 int main(int argc, char *argv[]) {
@@ -527,14 +528,26 @@ int main(int argc, char *argv[]) {
         uncompr = 1;
       else if (strcmp(*argv, "-f") == 0)
         outmode[3] = 'f';
-      else if (strcmp(*argv, "-h") == 0)
+      else if (strcmp(*argv, "-u") == 0)
         outmode[3] = 'h';
-      else if (strcmp(*argv, "-r") == 0)
+	  else if (strcmp(*argv, "-r") == 0)
         outmode[3] = 'R';
       else if ((*argv)[0] == '-' && (*argv)[1] >= '1' && (*argv)[1] <= '9' &&
                (*argv)[2] == 0)
         outmode[2] = (*argv)[1];
-      else
+      else if (strcmp(*argv, "-h") == 0)
+	  {
+		  printf("Usage:  minigzip [-c] [-d] [-f] [-h] [-r] [-1 to -9] [files...]\n");
+		  printf("   -c : write to standard output\n");
+		  printf("   -d : decompress\n");
+		  printf("   -f : compress with Z_FILTERED\n");
+		  printf("   -u : compress with Z_HUFFMAN_ONLY\n");
+		  printf("   -r : compress with Z_RLE\n");
+		  printf("   -1 to -9 : compression level\n");
+		  printf("   -h : show this help\n");
+		  exit(0);
+	  }
+	  else
         break;
       argc--, argv++;
     }

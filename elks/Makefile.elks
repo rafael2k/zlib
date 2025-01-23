@@ -24,7 +24,7 @@ LDBASE = -bos2 -s
 LDBASE += -Wl,option -Wl,dosseg
 LDBASE += -Wl,option -Wl,start=_start
 LDBASE += -Wl,option -Wl,nodefaultlibs
-LDBASE += -Wl,option -Wl,stack=0x4600
+LDBASE += -Wl,option -Wl,stack=0x3000
 LDBASE += -Wl,option -Wl,heapsize=512
 LDFLAGS = $(LDBASE)
 LDLIBS = -Wl,library -Wl,$(TOPDIR)/libc/libc.lib
@@ -37,7 +37,7 @@ OBJS = $(SRCS:.c=.obj)
 
 BINDIR = ../elks-bin
 LOCALFLAGS = -DNDEBUG
-PROG = gzip
+PROG = gzip untgz
 SRCS = \
      adler32.c \
      compress.c \
@@ -55,12 +55,27 @@ SRCS = \
      uncompr.c \
      zutil.c \
      mem.c \
-     test/minigzip.c
+
 
 all: $(PROG)
 
-$(PROG): $(OBJS)
-	$(LD) $(LDFLAGS) -o $@ $(OBJS) $(LDLIBS)
+gzip: $(OBJS) test/minigzip.obj
+	$(LD) $(LDFLAGS) -o $@ $(OBJS) test/minigzip.obj $(LDLIBS)
+
+#zip: $(OBJS) contrib/minizip/minizip.obj
+#	$(LD) $(LDFLAGS) -o $@ $(OBJS) contrib/minizip/minizip.obj $(LDLIBS)
+
+untgz: $(OBJS) contrib/untgz/untgz.obj
+	$(LD) $(LDFLAGS) -o $@ $(OBJS) contrib/untgz/untgz.obj $(LDLIBS)
+
+test/minigzip.obj: test/minigzip.c
+	$(CC) -c $(CFLAGS) -o test/minigzip.obj $<
+
+#contrib/minizip/minizip.obj: contrib/minizip/minizip.c
+#	$(CC) -c $(CFLAGS) -o contrib/minizip/minizip.obj $<
+
+contrib/untgz/untgz.obj: contrib/untgz/untgz.c
+	$(CC) -c $(CFLAGS) -o contrib/untgz/untgz.obj $<
 
 clean:
 	rm -f $(PROG) *.obj tmp.h

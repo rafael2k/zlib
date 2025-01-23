@@ -529,7 +529,7 @@ int tar (gzFile in,int action,int arg,int argc,char **argv)
 
           if (outfile != NULL)
             {
-              if (fwrite(&buffer,sizeof(char),bytes,outfile) != bytes)
+              if (fwrite((char *)&buffer,sizeof(char),bytes,outfile) != bytes)
                 {
                   fprintf(stderr,
                     "%s: Error writing %s -- skipping\n",prog,fname);
