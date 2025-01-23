@@ -30,6 +30,7 @@
 #endif
 
 #include <stdio.h>
+#include <unistd.h>
 #include "zlib.h"
 #ifdef STDC
 #  include <string.h>

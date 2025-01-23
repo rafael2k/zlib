@@ -1,0 +1,61 @@
+# Makefile for host compilatio
+
+############# Standard Section for Host C ##############
+CC = cc
+LD = cc
+CLBASE = -O3
+WARNINGS = -Wall -Wextra
+INCLUDES =
+DEFINES = -DMAX_WBITS=12 -DMAX_MEM_LEVEL=3 -DFASTEST
+CFLAGS = $(CLBASE) $(WARNINGS) $(INCLUDES) $(DEFINES) $(LOCALFLAGS)
+LDFLAGS =
+
+OBJS = $(SRCS:.c=.o)
+%.o: %.c
+	$(CC) -c $(CFLAGS) -o $*.o $<
+
+############# End of Standard Section ##############
+
+LOCALFLAGS = -Wno-unused-parameter
+PROG = gzip untgz
+SRCS = \
+     adler32.c \
+     compress.c \
+     crc32.c \
+     deflate.c \
+     gzclose.c \
+     gzlib.c \
+     gzread.c \
+     gzwrite.c \
+     infback.c \
+     inffast.c \
+     inflate.c \
+     inftrees.c \
+     trees.c \
+     uncompr.c \
+     zutil.c \
+     mem.c \
+
+all: $(PROG)
+
+gzip: $(OBJS) test/minigzip.o
+	$(LD) $(LDFLAGS) -o $@ $(OBJS) test/minigzip.o $(LDLIBS)
+
+#zip: $(OBJS) contrib/minizip/minizip.o
+#   	$(LD) $(LDFLAGS) -o $@ $(OBJS) contrib/minizip/minizip.o $(LDLIBS)
+
+untgz: $(OBJS) contrib/untgz/untgz.o
+	$(LD) $(LDFLAGS) -o $@ $(OBJS) contrib/untgz/untgz.o $(LDLIBS)
+
+test/minigzip.o: test/minigzip.c
+	$(CC) -c $(CFLAGS) -o test/minigzip.o $<
+
+#contrib/minizip/minizip.o: contrib/minizip/minizip.c
+#	$(CC) -c $(CFLAGS) -o contrib/minizip/minizip.o $<
+
+contrib/untgz/untgz.o: contrib/untgz/untgz.c
+	$(CC) -c $(CFLAGS) -o contrib/untgz/untgz.o $<
+
+
+clean:
+	rm -f $(PROG) $(OBJS)
