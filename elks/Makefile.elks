@@ -18,13 +18,13 @@ CLBASE += -Wc,-fpi87 -Wc,-zev -Wc,-zls -Wc,-x -Wc,-wcd=303
 WARNINGS = -Wall -Wextra
 INCLUDES = -I$(TOPDIR)/libc/include -I$(TOPDIR)/elks/include
 INCLUDES += -I$(TOPDIR)/libc/include/watcom
-DEFINES = -D__ELKS__ -DSYS16BIT -DMAX_WBITS=9 -DMAX_MEM_LEVEL=1
+DEFINES = -D__ELKS__ -DSYS16BIT -DMAX_WBITS=11 -DMAX_MEM_LEVEL=3
 CFLAGS = -Os $(CLBASE) $(WARNINGS) $(INCLUDES) $(DEFINES) $(LOCALFLAGS)
 LDBASE = -bos2 -s
 LDBASE += -Wl,option -Wl,dosseg
 LDBASE += -Wl,option -Wl,start=_start
 LDBASE += -Wl,option -Wl,nodefaultlibs
-LDBASE += -Wl,option -Wl,stack=0x3000
+LDBASE += -Wl,option -Wl,stack=0x4000
 LDBASE += -Wl,option -Wl,heapsize=512
 LDFLAGS = $(LDBASE)
 LDLIBS = -Wl,library -Wl,$(TOPDIR)/libc/libc.lib

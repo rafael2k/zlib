@@ -500,7 +500,7 @@ const char * ZEXPORT gzerror(gzFile file, int *errnum) {
     /* return error information */
     if (errnum != NULL)
         *errnum = state->err;
-    return state->err == Z_MEM_ERROR ? "out of memory" :
+    return state->err == Z_MEM_ERROR ? "out of memory 666" :
                                        (state->msg == NULL ? "" : state->msg);
 }
 

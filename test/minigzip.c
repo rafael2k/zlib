@@ -141,7 +141,7 @@ static void pwinerror (s)
 #endif
 #define SUFFIX_LEN (sizeof(GZ_SUFFIX)-1)
 
-#define BUFLEN      4096
+#define BUFLEN 2048
 #define MAX_NAME_LEN 512
 
 #ifdef MAXSEG_64K
@@ -491,7 +491,7 @@ static void file_uncompress(char *file) {
 
 
 /* ===========================================================================
- * Usage:  minigzip [-c] [-d] [-f] [-h] [-r] [-1 to -9] [files...]
+ * Usage:  minigzip [-c] [-d] [-f] [-u] [-h] [-r] [-1 to -9] [files...]
  *   -c : write to standard output
  *   -d : decompress
  *   -f : compress with Z_FILTERED
@@ -537,7 +537,7 @@ int main(int argc, char *argv[]) {
         outmode[2] = (*argv)[1];
       else if (strcmp(*argv, "-h") == 0)
 	  {
-		  printf("Usage:  minigzip [-c] [-d] [-f] [-h] [-r] [-1 to -9] [files...]\n");
+		  printf("Usage:  minigzip [-c] [-d] [-f] [-u] [-r] [-1 to -9] [-h] [files...]\n");
 		  printf("   -c : write to standard output\n");
 		  printf("   -d : decompress\n");
 		  printf("   -f : compress with Z_FILTERED\n");

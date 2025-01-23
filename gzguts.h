@@ -118,10 +118,13 @@
    (compile with -Dlocal if your debugger can't find static symbols) */
 
 /* gz* functions always use library allocation functions */
-#ifndef STDC
-  extern voidp  malloc(uInt size);
-  extern void   free(voidpf ptr);
-#endif
+#ifdef __ELKS__
+
+extern void *malloc(size_t size);
+extern void *calloc(size_t nmemb, size_t size);
+extern void free(void *ptr);
+
+#endif /* __ELKS__ */
 
 /* get errno and strerror definition */
 #if defined UNDER_CE
