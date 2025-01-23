@@ -32,7 +32,11 @@ void *malloc(size_t size)
     if (size <= malloc_arena_thresh)
         p = _fmalloc(size);
     else p = fmemalloc(size);
-    return p;
+
+    if (p == NULL)
+        fprintf(stderr, "returning NULL\n");
+
+	return p;
 }
 
 void *calloc(size_t nmemb, size_t size)

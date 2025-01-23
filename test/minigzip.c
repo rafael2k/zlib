@@ -490,6 +490,12 @@ static void file_uncompress(char *file) {
 }
 
 
+#ifdef FASTEST
+int no_level_selection = 1;
+#else
+int no_level_selection = 0;
+#endif
+
 /* ===========================================================================
  * Usage:  minigzip [-c] [-d] [-f] [-u] [-h] [-r] [-1 to -9] [files...]
  *   -c : write to standard output
@@ -537,13 +543,14 @@ int main(int argc, char *argv[]) {
         outmode[2] = (*argv)[1];
       else if (strcmp(*argv, "-h") == 0)
 	  {
-		  printf("Usage:  minigzip [-c] [-d] [-f] [-u] [-r] [-1 to -9] [-h] [files...]\n");
+		  printf("Usage:  minigzip [-c] [-d] [-f] [-u] [-r] %s[-h] [files...]\n", no_level_selection?"":"[-1 to -9] ");
 		  printf("   -c : write to standard output\n");
 		  printf("   -d : decompress\n");
 		  printf("   -f : compress with Z_FILTERED\n");
 		  printf("   -u : compress with Z_HUFFMAN_ONLY\n");
 		  printf("   -r : compress with Z_RLE\n");
-		  printf("   -1 to -9 : compression level\n");
+		  if (no_level_selection == 0)
+			  printf("   -1 to -9 : compression level\n");
 		  printf("   -h : show this help\n");
 		  exit(0);
 	  }
