@@ -249,39 +249,19 @@ void ZLIB_INTERNAL zcfree(voidpf opaque, voidpf ptr) {
 
 #endif /* __TURBOC__ */
 
+#ifdef __ELKS__
 
-#ifdef M_I86
-/* Microsoft C in 16-bit mode */
+extern void *malloc(size_t size);
+extern void *calloc(size_t nmemb, size_t size);
+extern void free(void *ptr);
 
-#  define MY_ZCALLOC
+#endif /* __ELKS__ */
 
-#if (!defined(_MSC_VER) || (_MSC_VER <= 600))
-#  define _halloc  halloc
-#  define _hfree   hfree
-#endif
-
-voidpf ZLIB_INTERNAL zcalloc(voidpf opaque, uInt items, uInt size) {
-    (void)opaque;
-    return _halloc((long)items, size);
-}
-
-void ZLIB_INTERNAL zcfree(voidpf opaque, voidpf ptr) {
-    (void)opaque;
-    _hfree(ptr);
-}
-
-#endif /* M_I86 */
 
 #endif /* SYS16BIT */
 
-
 #ifndef MY_ZCALLOC /* Any system without a special alloc function */
 
-#ifndef STDC
-extern voidp malloc(uInt size);
-extern voidp calloc(uInt items, uInt size);
-extern void free(voidpf ptr);
-#endif
 
 voidpf ZLIB_INTERNAL zcalloc(voidpf opaque, unsigned items, unsigned size) {
     (void)opaque;
