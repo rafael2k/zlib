@@ -18,7 +18,7 @@ CLBASE += -Wc,-fpi87 -Wc,-zev -Wc,-zls -Wc,-x -Wc,-wcd=303
 WARNINGS = -Wall -Wextra
 INCLUDES = -I$(TOPDIR)/libc/include -I$(TOPDIR)/elks/include
 INCLUDES += -I$(TOPDIR)/libc/include/watcom
-DEFINES = -D__ELKS__ -DSYS16BIT -DMAX_WBITS=12 -DMAX_MEM_LEVEL=3
+DEFINES = -D__ELKS__ -DSYS16BIT -DMAX_WBITS=12 -DMAX_MEM_LEVEL=3 -DFASTEST
 CFLAGS = -Os $(CLBASE) $(WARNINGS) $(INCLUDES) $(DEFINES) $(LOCALFLAGS)
 LDBASE = -bos2 -s
 LDBASE += -Wl,option -Wl,dosseg
@@ -88,4 +88,4 @@ contrib/untgz/untgz.obj: contrib/untgz/untgz.c
 
 
 clean:
-	rm -f $(PROG) *.obj tmp.h
+	rm -f $(PROG) *.obj test/minigzip.obj contrib/untgz/untgz.obj tmp.h
