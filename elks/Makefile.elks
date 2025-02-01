@@ -18,8 +18,8 @@ CLBASE += -Wc,-fpi87 -Wc,-zev -Wc,-zls -Wc,-x -Wc,-wcd=303
 WARNINGS = -Wall -Wextra
 INCLUDES = -I$(TOPDIR)/libc/include -I$(TOPDIR)/elks/include
 INCLUDES += -I$(TOPDIR)/libc/include/watcom
-DEFINES = -D__ELKS__ -DSYS16BIT -DMAX_WBITS=12 -DMAX_MEM_LEVEL=3 -DFASTEST
-CFLAGS = -O2 $(CLBASE) $(WARNINGS) $(INCLUDES) $(DEFINES) $(LOCALFLAGS)
+DEFINES = -D__ELKS__ -DSYS16BIT -DMAX_WBITS=12 -DMAX_MEM_LEVEL=3
+CFLAGS = -Os $(CLBASE) $(WARNINGS) $(INCLUDES) $(DEFINES) $(LOCALFLAGS)
 LDBASE = -bos2 -s
 LDBASE += -Wl,option -Wl,dosseg
 LDBASE += -Wl,option -Wl,start=_start
@@ -37,7 +37,7 @@ OBJS = $(SRCS:.c=.obj)
 
 BINDIR = ../elks-bin
 LOCALFLAGS = -DNDEBUG
-PROG = gzip untgz lupng
+PROG = gzip untgz
 SRCS = \
      adler32.c \
      compress.c \
@@ -62,27 +62,30 @@ all: $(PROG)
 gzip: $(OBJS) test/minigzip.obj
 	$(LD) $(LDFLAGS) -o $@ $(OBJS) test/minigzip.obj $(LDLIBS)
 
-#zip: $(OBJS) contrib/minizip/minizip.obj
-#	$(LD) $(LDFLAGS) -o $@ $(OBJS) contrib/minizip/minizip.obj $(LDLIBS)
-
 untgz: $(OBJS) contrib/untgz/untgz.obj
 	$(LD) $(LDFLAGS) -o $@ $(OBJS) contrib/untgz/untgz.obj $(LDLIBS)
 
-lupng: $(OBJS) test/lupng.obj
-	$(LD) $(LDFLAGS) -o $@ $(OBJS) test/lupng.obj $(LDLIBS)
+
+#zip: $(OBJS) contrib/minizip/minizip.obj
+#	$(LD) $(LDFLAGS) -o $@ $(OBJS) contrib/minizip/minizip.obj $(LDLIBS)
+
+#lupng: $(OBJS) test/lupng.obj
+#	$(LD) $(LDFLAGS) -o $@ $(OBJS) test/lupng.obj $(LDLIBS)
 
 
 test/minigzip.obj: test/minigzip.c
 	$(CC) -c $(CFLAGS) -o test/minigzip.obj $<
 
-test/lupng.obj: test/lupng.c
+contrib/untgz/untgz.obj: contrib/untgz/untgz.c
+	$(CC) -c $(CFLAGS) -o contrib/untgz/untgz.obj $<
+
+## these both are 'almost' working, but not there yet
+#test/lupng.obj: test/lupng.c
 	$(CC) -c $(CFLAGS) -o test/lupng.obj $<
 
 #contrib/minizip/minizip.obj: contrib/minizip/minizip.c
 #	$(CC) -c $(CFLAGS) -o contrib/minizip/minizip.obj $<
 
-contrib/untgz/untgz.obj: contrib/untgz/untgz.c
-	$(CC) -c $(CFLAGS) -o contrib/untgz/untgz.obj $<
 
 clean:
 	rm -f $(PROG) *.obj tmp.h

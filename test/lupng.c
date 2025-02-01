@@ -26,10 +26,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "zlib.h"
 
 #include "lupng.h"
+
+extern void *malloc(size_t size);
+extern void *calloc(size_t nmemb, size_t size);
+extern void free(void *ptr);
 
 #define PNG_NONE 0
 #define PNG_IHDR 0x01
@@ -639,6 +644,7 @@ static LU_INLINE int parseIdat(PngInfoStruct *info, PngChunk *chunk)
         status = inflate(&(info->stream), Z_NO_FLUSH);
         decompressed = BUF_SIZE - info->stream.avail_out;
 
+		printf("status: %d %d %d %d\n", status, Z_OK, Z_BUF_ERROR, Z_STREAM_END, Z_NEED_DICT);
         if (status != Z_OK && status != Z_STREAM_END && status != Z_BUF_ERROR &&
             status != Z_NEED_DICT) {
             LUPNG_WARN(info, "PNG: inflate error!");
@@ -1252,10 +1258,50 @@ void luUserContextInitDefault(LuUserContext *userCtx)
     userCtx->overrideImage = NULL;
 }
 
+#define VGA_256_COLOR_MODE  0x13      /* use to set 256-color mode. */
+#define TEXT_MODE           0x03      /* use to set 80x25 text mode. */
+
+
+uint8_t __far *VGA = (void __far *)0xA0000000L;        /* this points to video VGA memory. */
+void plot_pixel(int x,int y, uint8_t color)
+{
+	// x + (y*320)
+     /*  y*320 = y*256 + y*64 = y*2^8 + y*2^6   */
+    int offset = (y<<8)+(y<<6)+x;
+	VGA[offset] = color;
+/*    writevid(offset, color); */
+}
+
+void mode3();
+#pragma aux mode3 =								\
+"mov AH,0", \
+"mov AL,3H", \
+"int 10H", \
+modify [ AH AL ];
+
+void mode13();
+#pragma aux mode13 =								\
+"mov AH,0", \
+"mov AL,13H", \
+"int 10H", \
+modify [ AH AL ];
+
+
+void set_mode(uint8_t mode)
+{
+	if (mode == VGA_256_COLOR_MODE)
+		mode13();
+	if (mode == TEXT_MODE)
+		mode3();
+}
+
+
+
 int main(int argc, char **argv)
 {
     LuImage *img;
     int ret = 1;
+	int32_t y,x;
 
     if (argc < 3)
     {
@@ -1267,8 +1313,34 @@ int main(int argc, char **argv)
     img = luPngReadFile(argv[1]);
     if (img)
     {
-        ret = luPngWriteFile(argv[2], img);
-        luImageRelease(img, NULL);
+		printf("datasize: %ld\n", img->dataSize);
+		printf("width: %ld\n", img->width);
+		printf("height: %ld\n", img->height);
+		printf("channels: %u\n", img->channels);
+		printf("depth: %u", img->depth);
+		printf("Image DECODED!\n");
+		sleep(1);
+		set_mode(VGA_256_COLOR_MODE);
+		for (y = 0; y < img->height; y++)
+		{
+			for (x = 0; x < img->width; x++)
+			{
+				int32_t offset = (y * img->width + x) * img->channels;
+
+				int red = (img->data[offset] * 8) / 255;
+				int green = (img->data[offset+1] * 8) / 255;
+				int blue = (img->data[offset+2] * 8) / 255;
+				uint8_t eightBitColor = (uint8_t) (red << 5) | (green << 2) | blue;
+				plot_pixel(x, y, img->data[offset]);
+			}
+		}
+		sleep (10);
+		set_mode(TEXT_MODE);
+
+		ret = 0;
+
+        //ret = luPngWriteFile(argv[2], img);
+        //luImageRelease(img, NULL);
     }
 
     return ret;
