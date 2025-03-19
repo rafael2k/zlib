@@ -18,7 +18,7 @@ CLBASE += -Wc,-fpc -Wc,-zev -Wc,-zls -Wc,-x -Wc,-wcd=303
 WARNINGS = -Wall -Wextra
 INCLUDES = -I$(TOPDIR)/libc/include -I$(TOPDIR)/elks/include
 INCLUDES += -I$(TOPDIR)/libc/include/watcom
-DEFINES = -D__ELKS__ -DSYS16BIT -DMAX_WBITS=12 -DMAX_MEM_LEVEL=3 -DFASTEST
+DEFINES = -D__ELKS__ -D__unix__ -DSYS16BIT -DMAX_WBITS=12 -DMAX_MEM_LEVEL=3 -DFASTEST -DMINIZIP_FOPEN_NO_64 -DNOCRYPT -DUSE_FILE32API
 CFLAGS = -Os $(CLBASE) $(WARNINGS) $(INCLUDES) $(DEFINES) $(LOCALFLAGS)
 LDBASE = -bos2 -s
 LDBASE += -Wl,option -Wl,dosseg
@@ -66,8 +66,11 @@ untgz: $(OBJS) contrib/untgz/untgz.obj
 	$(LD) $(LDFLAGS) -o $@ $(OBJS) contrib/untgz/untgz.obj $(LDLIBS)
 
 
-#zip: $(OBJS) contrib/minizip/minizip.obj
-#	$(LD) $(LDFLAGS) -o $@ $(OBJS) contrib/minizip/minizip.obj $(LDLIBS)
+zip: $(OBJS) contrib/minizip/minizip.obj contrib/minizip/zip.obj contrib/minizip/ioapi.obj
+	$(LD) $(LDFLAGS) -o $@ $(OBJS) contrib/minizip/minizip.obj contrib/minizip/zip.obj contrib/minizip/ioapi.obj $(LDLIBS)
+
+unzip: $(OBJS) contrib/minizip/miniunz.obj contrib/minizip/unzip.obj contrib/minizip/ioapi.obj
+	$(LD) $(LDFLAGS) -o $@ $(OBJS) contrib/minizip/miniunz.obj contrib/minizip/unzip.obj contrib/minizip/ioapi.obj $(LDLIBS)
 
 #lupng: $(OBJS) test/lupng.obj
 #	$(LD) $(LDFLAGS) -o $@ $(OBJS) test/lupng.obj $(LDLIBS)
@@ -79,13 +82,26 @@ test/minigzip.obj: test/minigzip.c
 contrib/untgz/untgz.obj: contrib/untgz/untgz.c
 	$(CC) -c $(CFLAGS) -o contrib/untgz/untgz.obj $<
 
-## these both are 'almost' working, but not there yet
+## lupng is almost there
 #test/lupng.obj: test/lupng.c
 	$(CC) -c $(CFLAGS) -o test/lupng.obj $<
 
-#contrib/minizip/minizip.obj: contrib/minizip/minizip.c
-#	$(CC) -c $(CFLAGS) -o contrib/minizip/minizip.obj $<
+contrib/minizip/minizip.obj: contrib/minizip/minizip.c
+	$(CC) -c $(CFLAGS) -o contrib/minizip/minizip.obj $<
 
+contrib/minizip/miniunz.obj: contrib/minizip/miniunz.c
+	$(CC) -c $(CFLAGS) -o contrib/minizip/miniunz.obj $<
+
+contrib/minizip/zip.obj: contrib/minizip/zip.c
+	$(CC) -c $(CFLAGS) -o contrib/minizip/zip.obj $<
+
+
+contrib/minizip/unzip.obj: contrib/minizip/unzip.c
+	$(CC) -c $(CFLAGS) -o contrib/minizip/unzip.obj $<
+
+
+contrib/minizip/ioapi.obj: contrib/minizip/ioapi.c
+	$(CC) -c $(CFLAGS) -o contrib/minizip/ioapi.obj $<
 
 clean:
-	rm -f $(PROG) *.obj test/minigzip.obj contrib/untgz/untgz.obj tmp.h
+	rm -f $(PROG) *.obj contrib/minizip/*.obj test/minigzip.obj contrib/untgz/untgz.obj tmp.h

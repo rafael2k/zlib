@@ -95,7 +95,7 @@
 
 
 #ifndef UNZ_BUFSIZE
-#define UNZ_BUFSIZE (16384)
+#define UNZ_BUFSIZE 4096  // rafael2k 20/03/2025: was (16384)
 #endif
 
 #ifndef UNZ_MAXFILENAMEINZIP

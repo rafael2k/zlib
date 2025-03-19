@@ -12,26 +12,11 @@
          Copyright (C) 2009-2010 Mathias Svensson ( http://result42.com )
 */
 
-#if (!defined(_WIN32)) && (!defined(WIN32)) && (!defined(__APPLE__))
-        #ifndef __USE_FILE_OFFSET64
-                #define __USE_FILE_OFFSET64
-        #endif
-        #ifndef __USE_LARGEFILE64
-                #define __USE_LARGEFILE64
-        #endif
-        #ifndef _LARGEFILE64_SOURCE
-                #define _LARGEFILE64_SOURCE
-        #endif
-        #ifndef _FILE_OFFSET_BIT
-                #define _FILE_OFFSET_BIT 64
-        #endif
-#endif
-
 #if defined(__APPLE__) || defined(__HAIKU__) || defined(MINIZIP_FOPEN_NO_64)
 // In darwin and perhaps other BSD variants off_t is a 64 bit value, hence no need for specific 64 bit functions
 #define FOPEN_FUNC(filename, mode) fopen(filename, mode)
-#define FTELLO_FUNC(stream) ftello(stream)
-#define FSEEKO_FUNC(stream, offset, origin) fseeko(stream, offset, origin)
+#define FTELLO_FUNC(stream) ftell(stream)
+#define FSEEKO_FUNC(stream, offset, origin) fseek(stream, offset, origin)
 #else
 #define FOPEN_FUNC(filename, mode) fopen64(filename, mode)
 #define FTELLO_FUNC(stream) ftello64(stream)
@@ -62,7 +47,7 @@
 #include "unzip.h"
 
 #define CASESENSITIVITY (0)
-#define WRITEBUFFERSIZE (8192)
+#define WRITEBUFFERSIZE (4096)
 #define MAXFILENAME (256)
 
 #ifdef _WIN32
@@ -230,22 +215,22 @@ static void Display64BitsSize(ZPOS64_T n, int size_char) {
 
 static int do_list(unzFile uf) {
     uLong i;
-    unz_global_info64 gi;
+    unz_global_info gi;
     int err;
+    char *filename_inzip = malloc(WRITEBUFFERSIZE); // rafael2k 20/03/2025 - was 2 ^16 + 1 // :/
 
-    err = unzGetGlobalInfo64(uf,&gi);
+    err = unzGetGlobalInfo(uf,&gi);
     if (err!=UNZ_OK)
         printf("error %d with zipfile in unzGetGlobalInfo \n",err);
     printf("  Length  Method     Size Ratio   Date    Time   CRC-32     Name\n");
     printf("  ------  ------     ---- -----   ----    ----   ------     ----\n");
     for (i=0;i<gi.number_entry;i++)
     {
-        char filename_inzip[65536+1];
-        unz_file_info64 file_info;
+        unz_file_info file_info;
         uLong ratio=0;
         const char *string_method = "";
         char charCrypt=' ';
-        err = unzGetCurrentFileInfo64(uf,&file_info,filename_inzip,sizeof(filename_inzip),NULL,0,NULL,0);
+        err = unzGetCurrentFileInfo(uf,&file_info,filename_inzip,WRITEBUFFERSIZE,NULL,0,NULL,0);
         if (err!=UNZ_OK)
         {
             printf("error %d with zipfile in unzGetCurrentFileInfo\n",err);
@@ -300,6 +285,8 @@ static int do_list(unzFile uf) {
         }
     }
 
+    free(filename_inzip);
+    
     return 0;
 }
 
@@ -313,8 +300,8 @@ static int do_extract_currentfile(unzFile uf, const int* popt_extract_without_pa
     void* buf;
     uInt size_buf;
 
-    unz_file_info64 file_info;
-    err = unzGetCurrentFileInfo64(uf,&file_info,filename_inzip,sizeof(filename_inzip),NULL,0,NULL,0);
+    unz_file_info file_info;
+    err = unzGetCurrentFileInfo(uf,&file_info,filename_inzip,sizeof(filename_inzip),NULL,0,NULL,0);
 
     if (err!=UNZ_OK)
     {
@@ -477,10 +464,10 @@ static int do_extract_currentfile(unzFile uf, const int* popt_extract_without_pa
 
 static int do_extract(unzFile uf, int opt_extract_without_path, int opt_overwrite, const char* password) {
     uLong i;
-    unz_global_info64 gi;
+    unz_global_info gi;
     int err;
 
-    err = unzGetGlobalInfo64(uf,&gi);
+    err = unzGetGlobalInfo(uf,&gi);
     if (err!=UNZ_OK)
         printf("error %d with zipfile in unzGetGlobalInfo \n",err);
 

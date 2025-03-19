@@ -52,7 +52,7 @@
 #endif
 
 #ifndef Z_BUFSIZE
-#define Z_BUFSIZE (64*1024) /* (16384) */
+#define Z_BUFSIZE (4*1024) /* rafael2k - changed from 64*1024, 20/03/2025 */
 #endif
 
 #ifndef Z_MAXFILENAMEINZIP

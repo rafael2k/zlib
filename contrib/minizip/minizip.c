@@ -13,26 +13,12 @@
 */
 
 
-#if (!defined(_WIN32)) && (!defined(WIN32)) && (!defined(__APPLE__))
-        #ifndef __USE_FILE_OFFSET64
-                #define __USE_FILE_OFFSET64
-        #endif
-        #ifndef __USE_LARGEFILE64
-                #define __USE_LARGEFILE64
-        #endif
-        #ifndef _LARGEFILE64_SOURCE
-                #define _LARGEFILE64_SOURCE
-        #endif
-        #ifndef _FILE_OFFSET_BIT
-                #define _FILE_OFFSET_BIT 64
-        #endif
-#endif
-
 #if defined(__APPLE__) || defined(__HAIKU__) || defined(MINIZIP_FOPEN_NO_64)
 // In darwin and perhaps other BSD variants off_t is a 64 bit value, hence no need for specific 64 bit functions
+//#if 1
 #define FOPEN_FUNC(filename, mode) fopen(filename, mode)
-#define FTELLO_FUNC(stream) ftello(stream)
-#define FSEEKO_FUNC(stream, offset, origin) fseeko(stream, offset, origin)
+#define FTELLO_FUNC(stream) ftell(stream)
+#define FSEEKO_FUNC(stream, offset, origin) fseek(stream, offset, origin)
 #else
 #define FOPEN_FUNC(filename, mode) fopen64(filename, mode)
 #define FTELLO_FUNC(stream) ftello64(stream)
@@ -195,11 +181,11 @@ static int getFileCrc(const char* filenameinzip, void* buf, unsigned long size_b
         do
         {
             err = ZIP_OK;
-            size_read = (unsigned long)fread(buf,1,size_buf,fin);
+            size_read = fread(buf,1,size_buf,fin);
             if (size_read < size_buf)
                 if (feof(fin)==0)
             {
-                printf("error in reading %s\n",filenameinzip);
+                printf("1 error in reading %s\n",filenameinzip);
                 err = ZIP_ERRNO;
             }
 
@@ -218,7 +204,10 @@ static int getFileCrc(const char* filenameinzip, void* buf, unsigned long size_b
 }
 
 static int isLargeFile(const char* filename) {
-  int largeFile = 0;
+
+    return 0;
+#if 0
+    int largeFile = 0;
   ZPOS64_T pos = 0;
   FILE* pFile = FOPEN_FUNC(filename, "rb");
 
@@ -236,6 +225,7 @@ static int isLargeFile(const char* filename) {
   }
 
  return largeFile;
+#endif
 }
 
 int main(int argc, char *argv[]) {
@@ -393,7 +383,6 @@ int main(int argc, char *argv[]) {
                 const char *savefilenameinzip;
                 zip_fileinfo zi;
                 unsigned long crcFile=0;
-                int zip64 = 0;
 
                 zi.tmz_date.tm_sec = zi.tmz_date.tm_min = zi.tmz_date.tm_hour =
                 zi.tmz_date.tm_mday = zi.tmz_date.tm_mon = zi.tmz_date.tm_year = 0;
@@ -411,7 +400,6 @@ int main(int argc, char *argv[]) {
                 if ((password != NULL) && (err==ZIP_OK))
                     err = getFileCrc(filenameinzip,buf,size_buf,&crcFile);
 
-                zip64 = isLargeFile(filenameinzip);
 
                                                          /* The path name saved, should not include a leading slash. */
                /*if it did, windows/xp and dynazip couldn't read the zip file. */
@@ -440,13 +428,13 @@ int main(int argc, char *argv[]) {
                  }
 
                  /**/
-                err = zipOpenNewFileInZip3_64(zf,savefilenameinzip,&zi,
+                err = zipOpenNewFileInZip3(zf,savefilenameinzip,&zi,
                                  NULL,0,NULL,0,NULL /* comment*/,
                                  (opt_compress_level != 0) ? Z_DEFLATED : 0,
                                  opt_compress_level,0,
                                  /* -MAX_WBITS, DEF_MEM_LEVEL, Z_DEFAULT_STRATEGY, */
                                  -MAX_WBITS, DEF_MEM_LEVEL, Z_DEFAULT_STRATEGY,
-                                 password,crcFile, zip64);
+                                 password,crcFile);
 
                 if (err != ZIP_OK)
                     printf("error in opening %s in zipfile\n",filenameinzip);
@@ -465,16 +453,17 @@ int main(int argc, char *argv[]) {
                     {
                         err = ZIP_OK;
                         size_read = fread(buf,1,size_buf,fin);
+#if 0
                         if (size_read < size_buf)
                             if (feof(fin)==0)
                         {
-                            printf("error in reading %s\n",filenameinzip);
+                            printf("2 error in reading %s\n",filenameinzip);
                             err = ZIP_ERRNO;
                         }
-
+#endif
                         if (size_read>0)
                         {
-                            err = zipWriteInFileInZip (zf,buf,(unsigned)size_read);
+                            err = zipWriteInFileInZip (zf,buf, size_read);
                             if (err<0)
                             {
                                 printf("error in writing %s in the zipfile\n",

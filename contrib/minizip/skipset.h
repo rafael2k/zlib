@@ -233,7 +233,8 @@ void set_start(set_t *set) {
     *(unsigned char *)&set->head->key = 137;    /* set id */
     set->depth = 0;
     set_seed(&set->gen, ((ui64_t)(ptrdiff_t)set << 32) ^
-                        ((ui64_t)time(NULL) << 12) ^ clock(), 0);
+             ((ui64_t)time(NULL) << 12), 0);
+//                        ((ui64_t)time(NULL) << 12) ^ clock(), 0);
     set->ran = 1;
 }
 
