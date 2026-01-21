@@ -110,6 +110,7 @@ int ZEXPORT inflateResetKeep(z_streamp strm) {
     state = (struct inflate_state FAR *)strm->state;
     strm->total_in = strm->total_out = state->total = 0;
     strm->msg = Z_NULL;
+    strm->data_type = 0;
     if (state->wrap)        /* to support ill-conceived Java test suite */
         strm->adler = state->wrap & 1;
     state->mode = HEAD;
