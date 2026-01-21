@@ -24,7 +24,7 @@ LDBASE = -bos2 -s
 LDBASE += -Wl,option -Wl,dosseg
 LDBASE += -Wl,option -Wl,start=_start
 LDBASE += -Wl,option -Wl,nodefaultlibs
-LDBASE += -Wl,option -Wl,stack=0x4000
+LDBASE += -Wl,option -Wl,stack=0x5000
 LDBASE += -Wl,option -Wl,heapsize=512
 LDFLAGS = $(LDBASE)
 LDLIBS = -Wl,library -Wl,$(TOPDIR)/libc/libcl.lib
